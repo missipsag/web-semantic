@@ -1,0 +1,420 @@
+@prefix : <http://www.semanticweb.org/bibliotheque/ontologie#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xml: <http://www.w3.org/XML/1998/namespace> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+<http://www.semanticweb.org/bibliotheque/ontologie> a owl:Ontology ;
+    rdfs:label "Ontologie de gestion d'une bibliothèque"@fr ;
+    rdfs:comment "Formalisation OWL fondée sur le rapport fourni : classes, propriétés, contraintes et individus."@fr .
+
+#################################################################
+# CLASSES (TBox)
+#################################################################
+
+:Personne a owl:Class .
+:Lecteur a owl:Class ;
+    rdfs:subClassOf :Personne ;
+    rdfs:subClassOf [
+        a owl:Class ;
+        owl:intersectionOf (
+            :Personne
+            [ a owl:Restriction ;
+              owl:onProperty :effectueEmprunt ;
+              owl:allValuesFrom :Emprunt ]
+            [ a owl:Restriction ;
+              owl:onProperty :effectueReservation ;
+              owl:allValuesFrom :Reservation ]
+        )
+    ] .
+
+:Bibliothecaire a owl:Class ;
+    rdfs:subClassOf :Personne ;
+    rdfs:subClassOf [
+        a owl:Class ;
+        owl:intersectionOf (
+            :Personne
+            [ a owl:Restriction ;
+              owl:onProperty :gereEmprunt ;
+              owl:allValuesFrom :Emprunt ]
+            [ a owl:Restriction ;
+              owl:onProperty :travailleDans ;
+              owl:allValuesFrom :Bibliotheque ]
+        )
+    ] .
+
+:Auteur a owl:Class ;
+    rdfs:subClassOf :Personne ;
+    rdfs:subClassOf [
+        a owl:Class ;
+        owl:intersectionOf (
+            :Personne
+            [ a owl:Restriction ;
+              owl:onProperty :estAuteurDe ;
+              owl:allValuesFrom :Livre ]
+        )
+    ] .
+
+:RessourceDocumentaire a owl:Class .
+
+:Livre a owl:Class ;
+    rdfs:subClassOf :RessourceDocumentaire ;
+    rdfs:subClassOf [
+        a owl:Class ;
+        owl:intersectionOf (
+            :RessourceDocumentaire
+            [ a owl:Restriction ;
+              owl:onProperty :aPourAuteur ;
+              owl:allValuesFrom :Auteur ]
+            [ a owl:Restriction ;
+              owl:onProperty :aPourCategorie ;
+              owl:allValuesFrom :Categorie ]
+            [ a owl:Restriction ;
+              owl:onProperty :possedeExemplaire ;
+              owl:allValuesFrom :Exemplaire ]
+            [ a owl:Restriction ;
+              owl:onProperty :publiePar ;
+              owl:allValuesFrom :Editeur ]
+        )
+    ] .
+
+:Exemplaire a owl:Class ;
+    rdfs:subClassOf [
+        a owl:Class ;
+        owl:intersectionOf (
+            owl:Thing
+            [ a owl:Restriction ;
+              owl:onProperty :estExemplaireDe ;
+              owl:allValuesFrom :Livre ]
+            [ a owl:Restriction ;
+              owl:onProperty :appartientBibliotheque ;
+              owl:allValuesFrom :Bibliotheque ]
+        )
+    ] .
+
+:Categorie a owl:Class .
+:Editeur a owl:Class .
+:Operation a owl:Class .
+:Emprunt a owl:Class ;
+    rdfs:subClassOf :Operation ;
+    rdfs:subClassOf [
+        a owl:Class ;
+        owl:intersectionOf (
+            :Operation
+            [ a owl:Restriction ;
+              owl:onProperty :concerneExemplaire ;
+              owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+              owl:onClass :Exemplaire ]
+        )
+    ] .
+
+:Reservation a owl:Class ;
+    rdfs:subClassOf :Operation ;
+    rdfs:subClassOf [
+        a owl:Class ;
+        owl:intersectionOf (
+            :Operation
+            [ a owl:Restriction ;
+              owl:onProperty :reserveLivre ;
+              owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+              owl:onClass :Livre ]
+        )
+    ] .
+
+:Bibliotheque a owl:Class ;
+    rdfs:subClassOf [
+        a owl:Class ;
+        owl:intersectionOf (
+            owl:Thing
+            [ a owl:Restriction ;
+              owl:onProperty :emploieBibliothecaire ;
+              owl:allValuesFrom :Bibliothecaire ]
+        )
+    ] .
+
+# Disjonctions explicitement indiquées dans le rapport
+:Emprunt owl:disjointWith :Reservation .
+:Bibliothecaire owl:disjointWith :Auteur .
+
+#################################################################
+# OBJECT PROPERTIES (relations binaires et inverses)
+#################################################################
+
+:aPourAuteur a owl:ObjectProperty ;
+    rdfs:domain :Livre ; rdfs:range :Auteur ;
+    owl:inverseOf :estAuteurDe .
+
+:aPourCategorie a owl:ObjectProperty ;
+    rdfs:domain :Livre ; rdfs:range :Categorie ;
+    owl:inverseOf :classeLivre .
+
+:possedeExemplaire a owl:ObjectProperty ;
+    rdfs:domain :Livre ; rdfs:range :Exemplaire ;
+    owl:inverseOf :estExemplaireDe .
+
+:effectueEmprunt a owl:ObjectProperty ;
+    rdfs:domain :Lecteur ; rdfs:range :Emprunt ;
+    owl:inverseOf :empruntEffectuePar .
+
+:concerneExemplaire a owl:ObjectProperty ;
+    rdfs:domain :Emprunt ; rdfs:range :Exemplaire ;
+    owl:inverseOf :estConcerneParEmprunt .
+
+:effectueReservation a owl:ObjectProperty ;
+    rdfs:domain :Lecteur ; rdfs:range :Reservation ;
+    owl:inverseOf :reservationEffectueePar .
+
+:reserveLivre a owl:ObjectProperty ;
+    rdfs:domain :Reservation ; rdfs:range :Livre ;
+    owl:inverseOf :estReservePar .
+
+:gereEmprunt a owl:ObjectProperty ;
+    rdfs:domain :Bibliothecaire ; rdfs:range :Emprunt ;
+    owl:inverseOf :empruntGerePar .
+
+:appartientBibliotheque a owl:ObjectProperty ;
+    rdfs:domain :Exemplaire ; rdfs:range :Bibliotheque ;
+    owl:inverseOf :possedeRessource .
+
+:publiePar a owl:ObjectProperty ;
+    rdfs:domain :Livre ; rdfs:range :Editeur ;
+    owl:inverseOf :publie .
+
+:travailleDans a owl:ObjectProperty ;
+    rdfs:domain :Bibliothecaire ; rdfs:range :Bibliotheque ;
+    owl:inverseOf :emploieBibliothecaire .
+
+#################################################################
+# DATA PROPERTIES (attributs)
+#################################################################
+
+:nom a owl:DatatypeProperty, owl:FunctionalProperty ;
+    rdfs:domain :Personne ; rdfs:range xsd:string .
+
+:prenom a owl:DatatypeProperty, owl:FunctionalProperty ;
+    rdfs:domain :Personne ; rdfs:range xsd:string .
+
+:email a owl:DatatypeProperty ;
+    rdfs:domain :Personne ; rdfs:range xsd:string .
+
+:numeroLecteur a owl:DatatypeProperty, owl:FunctionalProperty ;
+    rdfs:domain :Lecteur ; rdfs:range xsd:string .
+
+:titre a owl:DatatypeProperty ;
+    rdfs:domain :Livre ; rdfs:range xsd:string .
+
+:isbn a owl:DatatypeProperty, owl:FunctionalProperty ;
+    rdfs:domain :Livre ; rdfs:range xsd:string .
+
+:anneePublication a owl:DatatypeProperty ;
+    rdfs:domain :Livre ; rdfs:range xsd:integer .
+
+:langue a owl:DatatypeProperty ;
+    rdfs:domain :Livre ; rdfs:range xsd:string .
+
+:cote a owl:DatatypeProperty, owl:FunctionalProperty ;
+    rdfs:domain :Exemplaire ; rdfs:range xsd:string .
+
+:etatExemplaire a owl:DatatypeProperty ;
+    rdfs:domain :Exemplaire ; rdfs:range xsd:string .
+
+:dateEmprunt a owl:DatatypeProperty ;
+    rdfs:domain :Emprunt ; rdfs:range xsd:dateTime .
+
+:dateRetourPrevue a owl:DatatypeProperty ;
+    rdfs:domain :Emprunt ; rdfs:range xsd:dateTime .
+
+:dateRetourEffective a owl:DatatypeProperty ;
+    rdfs:domain :Emprunt ; rdfs:range xsd:dateTime .
+
+:statutEmprunt a owl:DatatypeProperty ;
+    rdfs:domain :Emprunt ; rdfs:range xsd:string .
+
+:dateReservation a owl:DatatypeProperty ;
+    rdfs:domain :Reservation ; rdfs:range xsd:dateTime .
+
+:statutReservation a owl:DatatypeProperty ;
+    rdfs:domain :Reservation ; rdfs:range xsd:string .
+
+:nomCategorie a owl:DatatypeProperty, owl:FunctionalProperty ;
+    rdfs:domain :Categorie ; rdfs:range xsd:string .
+
+:nomEditeur a owl:DatatypeProperty ;
+    rdfs:domain :Editeur ; rdfs:range xsd:string .
+
+:nomBibliotheque a owl:DatatypeProperty, owl:FunctionalProperty ;
+    rdfs:domain :Bibliotheque ; rdfs:range xsd:string .
+
+
+#################################################################
+# CARDINALITES SELON LE TABLEAU DES RELATIONS BINAIRES DU RAPPORT
+#################################################################
+
+# Livre : 0..* auteurs
+:Livre rdfs:subClassOf [
+    a owl:Restriction ; owl:onProperty :aPourAuteur ;
+    owl:minQualifiedCardinality "0"^^xsd:nonNegativeInteger ; owl:onClass :Auteur
+] .
+
+# Livre : 0..* categories
+:Livre rdfs:subClassOf [
+    a owl:Restriction ; owl:onProperty :aPourCategorie ;
+    owl:minQualifiedCardinality "0"^^xsd:nonNegativeInteger ; owl:onClass :Categorie
+] .
+
+# Livre : 0..* exemplaires
+:Livre rdfs:subClassOf [
+    a owl:Restriction ; owl:onProperty :possedeExemplaire ;
+    owl:minQualifiedCardinality "0"^^xsd:nonNegativeInteger ; owl:onClass :Exemplaire
+] .
+
+# Lecteur : 0..* emprunts
+:Lecteur rdfs:subClassOf [
+    a owl:Restriction ; owl:onProperty :effectueEmprunt ;
+    owl:minQualifiedCardinality "0"^^xsd:nonNegativeInteger ; owl:onClass :Emprunt
+] .
+
+# Emprunt : exactement 1 exemplaire
+:Emprunt rdfs:subClassOf [
+    a owl:Restriction ; owl:onProperty :concerneExemplaire ;
+    owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ; owl:onClass :Exemplaire
+] .
+
+# Lecteur : 0..* reservations
+:Lecteur rdfs:subClassOf [
+    a owl:Restriction ; owl:onProperty :effectueReservation ;
+    owl:minQualifiedCardinality "0"^^xsd:nonNegativeInteger ; owl:onClass :Reservation
+] .
+
+# Reservation : exactement 1 livre
+:Reservation rdfs:subClassOf [
+    a owl:Restriction ; owl:onProperty :reserveLivre ;
+    owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ; owl:onClass :Livre
+] .
+
+# Bibliothecaire : 0..* emprunts geres
+:Bibliothecaire rdfs:subClassOf [
+    a owl:Restriction ; owl:onProperty :gereEmprunt ;
+    owl:minQualifiedCardinality "0"^^xsd:nonNegativeInteger ; owl:onClass :Emprunt
+] .
+
+# Exemplaire : exactement 1 bibliotheque
+:Exemplaire rdfs:subClassOf [
+    a owl:Restriction ; owl:onProperty :appartientBibliotheque ;
+    owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ; owl:onClass :Bibliotheque
+] .
+
+# Livre : 0 ou 1 editeur
+:Livre rdfs:subClassOf [
+    a owl:Restriction ; owl:onProperty :publiePar ;
+    owl:maxQualifiedCardinality "1"^^xsd:nonNegativeInteger ; owl:onClass :Editeur
+] .
+
+# Bibliothecaire : exactement 1 bibliotheque de travail
+:Bibliothecaire rdfs:subClassOf [
+    a owl:Restriction ; owl:onProperty :travailleDans ;
+    owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ; owl:onClass :Bibliotheque
+] .
+
+#################################################################
+# INDIVIDUALS (ABox) : assertions de concepts
+#################################################################
+
+:lecteur_amina a owl:NamedIndividual, :Personne, :Lecteur ;
+    :nom "Bensaid" ;
+    :prenom "Amina" ;
+    :email "amina@gmail.com" ;
+    :numeroLecteur "L001" .
+
+:bibliothecaire_samir a owl:NamedIndividual, :Personne, :Bibliothecaire ;
+    :nom "Kaci" ;
+    :prenom "Samir" ;
+    :email "samir@gmail.com" .
+
+:auteur_antoine a owl:NamedIndividual, :Personne, :Auteur ;
+    :nom "de Saint-Exupéry" ;
+    :prenom "Antoine" .
+
+:livre_petit_prince a owl:NamedIndividual, :RessourceDocumentaire, :Livre ;
+    :titre "Le Petit Prince" ;
+    :isbn "9782070612758" ;
+    :anneePublication 1943 ;
+    :langue "français" .
+
+:exemplaire_001 a owl:NamedIndividual, :Exemplaire ;
+    :cote "LIT-001" ;
+    :etatExemplaire "Bon état" .
+
+:categorie_litterature a owl:NamedIndividual, :Categorie ;
+    :nomCategorie "Littérature" .
+
+:editeur_gallimard a owl:NamedIndividual, :Editeur ;
+    :nomEditeur "Gallimard" .
+
+:bibliotheque_centrale a owl:NamedIndividual, :Bibliotheque ;
+    :nomBibliotheque "Bibliothèque centrale" .
+
+:emprunt_001 a owl:NamedIndividual, :Operation, :Emprunt ;
+    :dateEmprunt "2026-11-01T00:00:00"^^xsd:dateTime ;
+    :dateRetourPrevue "2026-11-15T00:00:00"^^xsd:dateTime .
+
+:reservation_001 a owl:NamedIndividual, :Operation, :Reservation ;
+    :dateReservation "2026-11-03T00:00:00"^^xsd:dateTime ;
+    :statutReservation "En attente" .
+
+#################################################################
+# INDIVIDUALS : assertions de relations
+#################################################################
+
+:livre_petit_prince :aPourAuteur :auteur_antoine ;
+    :aPourCategorie :categorie_litterature ;
+    :possedeExemplaire :exemplaire_001 ;
+    :publiePar :editeur_gallimard .
+
+:lecteur_amina :effectueEmprunt :emprunt_001 ;
+    :effectueReservation :reservation_001 .
+
+:emprunt_001 :concerneExemplaire :exemplaire_001 .
+:reservation_001 :reserveLivre :livre_petit_prince .
+:bibliothecaire_samir :gereEmprunt :emprunt_001 ;
+    :travailleDans :bibliotheque_centrale .
+:exemplaire_001 :appartientBibliotheque :bibliotheque_centrale .
+
+
+
+@prefix : <http://www.semanticweb.org/bibliotheque/ontologie#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix wd: <http://www.wikidata.org/entity/> .
+@prefix wdt: <http://www.wikidata.org/prop/direct/> .
+@prefix schema: <https://schema.org/> .
+
+#################################################################
+# ALIGNEMENT DES CLASSES (TBox -> Wikidata & Schema.org)
+#################################################################
+
+:Personne owl:equivalentClass wd:Q5, schema:Person .
+:Livre owl:equivalentClass wd:Q571, schema:Book .
+:Bibliotheque owl:equivalentClass wd:Q7075, schema:Library .
+:Editeur skos:exactMatch wd:Q2085381 ; rdfs:subClassOf schema:Organization .
+:Auteur skos:closeMatch wd:Q482980 .
+:Bibliothecaire skos:closeMatch wd:Q182436 .
+
+#################################################################
+# ALIGNEMENT DES PROPRIETES
+#################################################################
+
+:aPourAuteur owl:equivalentProperty wdt:P50, schema:author .
+:publiePar owl:equivalentProperty wdt:P123, schema:publisher .
+:isbn rdfs:subPropertyOf wdt:P212 ; owl:equivalentProperty schema:isbn .
+:titre owl:equivalentProperty schema:name ; skos:closeMatch wdt:P1476 .
+
+#################################################################
+# LIAGE DES INDIVIDUS PUBLICS (ABox -> Wikidata)
+#################################################################
+
+:auteur_antoine owl:sameAs wd:Q4708 .
+:livre_petit_prince owl:sameAs wd:Q25338 .
+:editeur_gallimard owl:sameAs wd:Q273819 .
