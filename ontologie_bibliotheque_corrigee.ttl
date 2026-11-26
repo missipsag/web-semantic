@@ -4,8 +4,12 @@
 @prefix xml: <http://www.w3.org/XML/1998/namespace> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix wd: <http://www.wikidata.org/entity/> .
+@prefix wdt: <http://www.wikidata.org/prop/direct/> .
+@prefix schema: <https://schema.org/> .
 
-<http://www.semanticweb.org/bibliotheque/ontologie> a owl:Ontology ;
+<https://missipsag.github.io/web-semantic/ontologie_bibliotheque_corrigee.ttl> a owl:Ontology ;
     rdfs:label "Ontologie de gestion d'une bibliothèque"@fr ;
     rdfs:comment "Formalisation OWL fondée sur le rapport fourni : classes, propriétés, contraintes et individus."@fr .
 
@@ -246,72 +250,60 @@
 :nomBibliotheque a owl:DatatypeProperty, owl:FunctionalProperty ;
     rdfs:domain :Bibliotheque ; rdfs:range xsd:string .
 
-
 #################################################################
 # CARDINALITES SELON LE TABLEAU DES RELATIONS BINAIRES DU RAPPORT
 #################################################################
 
-# Livre : 0..* auteurs
 :Livre rdfs:subClassOf [
     a owl:Restriction ; owl:onProperty :aPourAuteur ;
     owl:minQualifiedCardinality "0"^^xsd:nonNegativeInteger ; owl:onClass :Auteur
 ] .
 
-# Livre : 0..* categories
 :Livre rdfs:subClassOf [
     a owl:Restriction ; owl:onProperty :aPourCategorie ;
     owl:minQualifiedCardinality "0"^^xsd:nonNegativeInteger ; owl:onClass :Categorie
 ] .
 
-# Livre : 0..* exemplaires
 :Livre rdfs:subClassOf [
     a owl:Restriction ; owl:onProperty :possedeExemplaire ;
     owl:minQualifiedCardinality "0"^^xsd:nonNegativeInteger ; owl:onClass :Exemplaire
 ] .
 
-# Lecteur : 0..* emprunts
 :Lecteur rdfs:subClassOf [
     a owl:Restriction ; owl:onProperty :effectueEmprunt ;
     owl:minQualifiedCardinality "0"^^xsd:nonNegativeInteger ; owl:onClass :Emprunt
 ] .
 
-# Emprunt : exactement 1 exemplaire
 :Emprunt rdfs:subClassOf [
     a owl:Restriction ; owl:onProperty :concerneExemplaire ;
     owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ; owl:onClass :Exemplaire
 ] .
 
-# Lecteur : 0..* reservations
 :Lecteur rdfs:subClassOf [
     a owl:Restriction ; owl:onProperty :effectueReservation ;
     owl:minQualifiedCardinality "0"^^xsd:nonNegativeInteger ; owl:onClass :Reservation
 ] .
 
-# Reservation : exactement 1 livre
 :Reservation rdfs:subClassOf [
     a owl:Restriction ; owl:onProperty :reserveLivre ;
     owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ; owl:onClass :Livre
 ] .
 
-# Bibliothecaire : 0..* emprunts geres
 :Bibliothecaire rdfs:subClassOf [
     a owl:Restriction ; owl:onProperty :gereEmprunt ;
     owl:minQualifiedCardinality "0"^^xsd:nonNegativeInteger ; owl:onClass :Emprunt
 ] .
 
-# Exemplaire : exactement 1 bibliotheque
 :Exemplaire rdfs:subClassOf [
     a owl:Restriction ; owl:onProperty :appartientBibliotheque ;
     owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ; owl:onClass :Bibliotheque
 ] .
 
-# Livre : 0 ou 1 editeur
 :Livre rdfs:subClassOf [
     a owl:Restriction ; owl:onProperty :publiePar ;
     owl:maxQualifiedCardinality "1"^^xsd:nonNegativeInteger ; owl:onClass :Editeur
 ] .
 
-# Bibliothecaire : exactement 1 bibliotheque de travail
 :Bibliothecaire rdfs:subClassOf [
     a owl:Restriction ; owl:onProperty :travailleDans ;
     owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ; owl:onClass :Bibliotheque
@@ -380,16 +372,6 @@
 :bibliothecaire_samir :gereEmprunt :emprunt_001 ;
     :travailleDans :bibliotheque_centrale .
 :exemplaire_001 :appartientBibliotheque :bibliotheque_centrale .
-
-
-
-@prefix : <http://www.semanticweb.org/bibliotheque/ontologie#> .
-@prefix owl: <http://www.w3.org/2002/07/owl#> .
-@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
-@prefix wd: <http://www.wikidata.org/entity/> .
-@prefix wdt: <http://www.wikidata.org/prop/direct/> .
-@prefix schema: <https://schema.org/> .
 
 #################################################################
 # ALIGNEMENT DES CLASSES (TBox -> Wikidata & Schema.org)
