@@ -1,4 +1,4 @@
-@prefix : <http://www.semanticweb.org/bibliotheque/ontologie#> .
+@prefix : <https://missipsag.github.io/web-semantic/ontologie_bibliotheque_corrigee.ttl#> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix xml: <http://www.w3.org/XML/1998/namespace> .
